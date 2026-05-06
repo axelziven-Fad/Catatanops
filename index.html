@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SPPG Kulon Progo Panjatan 2 - Secure System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --accent: #38BDF8;
+            --accent-hover: #0284C7;
+            --border-color: #334155;
+            --success: #10B981;
+            --success-hover: #059669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Mencegah highlight biru saat di-tap di HP */
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span {
+            color: var(--accent);
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .category-header {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-left: 0.8rem;
+            border-left: 4px solid var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .school-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .school-item {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .school-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .school-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            flex: 1 1 200px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex: 1 1 350px;
+            justify-content: flex-end;
+        }
+
+        select, input {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1rem; /* Diperbesar sedikit biar enak di-tap */
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+
+        select {
+            width: 100%;
+            max-width: 380px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394A3B8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 2.5rem;
+        }
+
+        input[type="number"] {
+            width: 120px;
+            display: none;
+            cursor: text;
+        }
+
+        .show-input input[type="number"] {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-generate {
+            background-color: var(--accent);
+            color: var(--bg-main);
+            border: none;
+            padding: 1.2rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 6px -1px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-generate:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-container h3 {
+            margin-bottom: 1.2rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.2rem;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            font-family: monospace;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-copy {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            float: right;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--success-hover);
+        }
+
+        .result-container::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* KHUSUS PENGATURAN HP (MOBILE OPTIMIZATION) */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem; /* Kurangi padding utama biar layar lega */
+            }
+
+            header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+            }
+
+            h1 {
+                font-size: 1.6rem; /* Judul agak dikecilin */
+            }
+
+            .school-item {
+                flex-direction: column;
+                align-items: stretch; /* Paksa item penuhi lebar layar */
+                padding: 1rem;
+                gap: 0.8rem;
+            }
+
+            .school-name {
+                flex: none;
+                font-size: 1.1rem;
+                border-bottom: 1px dashed var(--border-color);
+                padding-bottom: 0.5rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .controls {
+                flex-direction: column; /* Dropdown dan input jadi tumpuk bawah */
+                align-items: stretch;
+                flex: none;
+                gap: 0.8rem;
+            }
+
+            select {
+                max-width: 100%; /* Dropdown full width */
+                font-size: 1rem;
+                padding: 0.9rem 1rem; /* Touch target maksimal */
+            }
+
+            input[type="number"] {
+                width: 100%; /* Input angka juga full width */
+                font-size: 1rem;
+                padding: 0.9rem 1rem;
+            }
+
+            .result-container {
+                padding: 1.2rem;
+            }
+
+            .btn-copy {
+                width: 100%; /* Tombol copy full width di HP */
+                float: none;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>SPPG Kulon Progo <span>Panjatan 2</span></h1>
+        <p class="subtitle">Generator Catatan Distribusi MBG - Secure System</p>
+    </header>
+
+    <div id="schoolList">
+        <!-- Konten akan di-generate via JavaScript -->
+    </div>
+
+    <button class="btn-generate" onclick="generateReport()">Generate Catatan Sekarang</button>
+
+    <div class="result-container">
+        <h3>
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Output Catatan (Siap Copas)
+        </h3>
+        <textarea id="outputText" readonly placeholder="Hasil generate akan muncul di sini..."></textarea>
+        <button class="btn-copy" onclick="copyToClipboard()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+            Copy Text
+        </button>
+    </div>
+</div>
+
+<script>
+    const schoolGroups = [
+        {
+            category: "Kelompok PAUD, KB & RA",
+            items: [
+                "KB Masita", "KB Edelweiss", "KB Citragami", "KB Nakula Sadewa", 
+                "KB Sadewo", "KB Pregiwati", "KB Bayu Seto", "KB Sadewa Cerme", 
+                "RA Masyithoh Gotakan", "RA Zaid Bin Sabit Gotakan"
+            ]
+        },
+        {
+            category: "Kelompok Taman Kanak-Kanak (TK)",
+            items: [
+                "TK PKK Puspitorini", "TK Masita", "TK ABA Pereng", "TK Masyitoh Maesan", 
+                "TK PKK Melati Kemendung", "TK PKK Kartini", "TK ABA Dukuh"
+            ]
+        },
+        {
+            category: "Kelompok SD & MI",
+            items: [
+                "SD Negeri Kepuh", "SD Negeri 1 Depok", "SD Negeri Kembangmalang", 
+                "SD Unggulan Muhammadiyah Krembangan", "SD Negeri Dukuh Panjatan", 
+                "SD Negeri Kemendung", "SD Negeri Krembangan", "MI Zaid Bin Sabit Gotakan"
+            ]
+        },
+        {
+            category: "Kelompok Menengah & Khusus",
+            items: [
+                "MAN 2 Kulon Progo", "Ibu Hamil (Bumil)", "Ibu Menyusui (Busui)"
+            ]
+        }
+    ];
+
+    const schoolListContainer = document.getElementById('schoolList');
+    const allSchoolsMap = []; 
+
+    let globalIndex = 0;
+
+    schoolGroups.forEach(group => {
+        const header = document.createElement('h2');
+        header.className = 'category-header';
+        header.textContent = group.category;
+        schoolListContainer.appendChild(header);
+
+        const listDiv = document.createElement('div');
+        listDiv.className = 'school-list';
+
+        group.items.forEach(school => {
+            const div = document.createElement('div');
+            div.className = 'school-item';
+            div.id = `item-${globalIndex}`;
+
+            div.innerHTML = `
+                <div class="school-name">${school}</div>
+                <div class="controls" id="control-${globalIndex}">
+                    <select id="status-${globalIndex}" onchange="handleStatusChange(${globalIndex})">
+                        <option value="aman">Aman / Sesuai (Tidak Masuk Catatan)</option>
+                        <option value="porsi">Hanya Menerima ... Porsi</option>
+                        <option value="libur">LIBUR</option>
+                        <option value="luar">Tidak ingin menerima MBG (Kegiatan Luar)</option>
+                    </select>
+                    <input type="number" id="porsi-${globalIndex}" placeholder="Jml Porsi" min="0">
+                </div>
+            `;
+            listDiv.appendChild(div);
+            
+            allSchoolsMap.push({ id: globalIndex, name: school });
+            globalIndex++;
+        });
+
+        schoolListContainer.appendChild(listDiv);
+    });
+
+    function handleStatusChange(index) {
+        const selectBox = document.getElementById(`status-${index}`);
+        const controlDiv = document.getElementById(`control-${index}`);
+        
+        if (selectBox.value === 'porsi') {
+            controlDiv.classList.add('show-input');
+            // Sedikit delay di HP biar keyboard muncul gak bikin loncat layout
+            setTimeout(() => { document.getElementById(`porsi-${index}`).focus(); }, 100);
+        } else {
+            controlDiv.classList.remove('show-input');
+            document.getElementById(`porsi-${index}`).value = ""; 
+        }
+    }
+
+    function generateReport() {
+        let finalReport = [];
+
+        allSchoolsMap.forEach(schoolData => {
+            const status = document.getElementById(`status-${schoolData.id}`).value;
+            
+            if (status === 'porsi') {
+                const porsiValue = document.getElementById(`porsi-${schoolData.id}`).value;
+                const jumlah = porsiValue ? porsiValue : "0"; 
+                finalReport.push(`${schoolData.name} Hanya Menerima ${jumlah} Porsi`);
+            } else if (status === 'libur') {
+                finalReport.push(`${schoolData.name} LIBUR`);
+            } else if (status === 'luar') {
+                finalReport.push(`${schoolData.name} Tidak ingin menerima MBG (Kegiatan Luar)`);
+            }
+        });
+
+        const outputTextArea = document.getElementById('outputText');
+        
+        if (finalReport.length === 0) {
+            outputTextArea.value = "Semua instansi berjalan normal. Tidak ada catatan khusus hari ini.";
+        } else {
+            outputTextArea.value = finalReport.join('\n');
+        }
+        
+        outputTextArea.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function copyToClipboard() {
+        const outputText = document.getElementById("outputText");
+        
+        if (!outputText.value || outputText.value === "") {
+            alert("Bro, datanya kosong. Generate dulu catatannya!");
+            return;
+        }
+
+        outputText.select();
+        outputText.setSelectionRange(0, 99999); 
+
+        navigator.clipboard.writeText(outputText.value).then(() => {
+            const copyBtn = document.querySelector('.btn-copy');
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = "Copied! ✓";
+            copyBtn.style.backgroundColor = "var(--success-hover)"; 
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHTML;
+                copyBtn.style.backgroundColor = "var(--success)";
+            }, 2000);
+        }).catch(err => {
+            console.error('Gagal copy teks: ', err);
+            alert("Gagal copy otomatis. Silakan blok teks dan copy manual ya Bro.");
+        });
+    }
+</script>
+
+</body>
+</html>
