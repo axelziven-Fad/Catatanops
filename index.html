@@ -151,7 +151,15 @@
             cursor: text;
         }
 
-        .show-input input[type="number"] {
+        /* Tambahan untuk input kelas khusus SD */
+        input[type="text"].kelas-input {
+            width: 140px;
+            display: none;
+            cursor: text;
+        }
+
+        .show-input input[type="number"],
+        .show-input input[type="text"].kelas-input {
             display: block;
             animation: fadeIn 0.3s ease;
         }
@@ -252,7 +260,7 @@
         /* KHUSUS PENGATURAN HP (MOBILE OPTIMIZATION) */
         @media (max-width: 768px) {
             body {
-                padding: 1rem; /* Kurangi padding utama biar layar lega */
+                padding: 1rem;
             }
 
             header {
@@ -261,12 +269,12 @@
             }
 
             h1 {
-                font-size: 1.6rem; /* Judul agak dikecilin */
+                font-size: 1.6rem; 
             }
 
             .school-item {
                 flex-direction: column;
-                align-items: stretch; /* Paksa item penuhi lebar layar */
+                align-items: stretch;
                 padding: 1rem;
                 gap: 0.8rem;
             }
@@ -280,20 +288,21 @@
             }
 
             .controls {
-                flex-direction: column; /* Dropdown dan input jadi tumpuk bawah */
+                flex-direction: column; 
                 align-items: stretch;
                 flex: none;
                 gap: 0.8rem;
             }
 
             select {
-                max-width: 100%; /* Dropdown full width */
+                max-width: 100%; 
                 font-size: 1rem;
-                padding: 0.9rem 1rem; /* Touch target maksimal */
+                padding: 0.9rem 1rem;
             }
 
-            input[type="number"] {
-                width: 100%; /* Input angka juga full width */
+            input[type="number"],
+            input[type="text"].kelas-input {
+                width: 100%; /* Biar input tambahan nggak berantakan di HP */
                 font-size: 1rem;
                 padding: 0.9rem 1rem;
             }
@@ -303,7 +312,7 @@
             }
 
             .btn-copy {
-                width: 100%; /* Tombol copy full width di HP */
+                width: 100%; 
                 float: none;
                 padding: 1rem;
             }
@@ -383,11 +392,19 @@
 
         const listDiv = document.createElement('div');
         listDiv.className = 'school-list';
+        
+        // Pengecekan apakah kategori ini adalah kelompok SD/MI
+        const isSDCategory = group.category.includes("SD");
 
         group.items.forEach(school => {
             const div = document.createElement('div');
             div.className = 'school-item';
             div.id = `item-${globalIndex}`;
+            
+            // Conditional rendering input kelas khusus grup SD
+            const kelasInputHTML = isSDCategory 
+                ? `<input type="text" id="kelas-${globalIndex}" class="kelas-input" placeholder="Kelas libur (Misal: 4)">` 
+                : '';
 
             div.innerHTML = `
                 <div class="school-name">${school}</div>
@@ -399,11 +416,12 @@
                         <option value="luar">Tidak ingin menerima MBG (Kegiatan Luar)</option>
                     </select>
                     <input type="number" id="porsi-${globalIndex}" placeholder="Jml Porsi" min="0">
+                    ${kelasInputHTML}
                 </div>
             `;
             listDiv.appendChild(div);
             
-            allSchoolsMap.push({ id: globalIndex, name: school });
+            allSchoolsMap.push({ id: globalIndex, name: school, isSD: isSDCategory });
             globalIndex++;
         });
 
@@ -416,11 +434,16 @@
         
         if (selectBox.value === 'porsi') {
             controlDiv.classList.add('show-input');
-            // Sedikit delay di HP biar keyboard muncul gak bikin loncat layout
             setTimeout(() => { document.getElementById(`porsi-${index}`).focus(); }, 100);
         } else {
             controlDiv.classList.remove('show-input');
             document.getElementById(`porsi-${index}`).value = ""; 
+            
+            // Reset input kelas jika ada
+            const kelasInput = document.getElementById(`kelas-${index}`);
+            if (kelasInput) {
+                kelasInput.value = "";
+            }
         }
     }
 
@@ -433,7 +456,17 @@
             if (status === 'porsi') {
                 const porsiValue = document.getElementById(`porsi-${schoolData.id}`).value;
                 const jumlah = porsiValue ? porsiValue : "0"; 
-                finalReport.push(`${schoolData.name} Hanya Menerima ${jumlah} Porsi`);
+                
+                let keteranganKelas = "";
+                // Eksekusi penambahan keterangan hanya jika instansi tersebut di kategori SD dan fieldnya diisi
+                if (schoolData.isSD) {
+                    const kelasInput = document.getElementById(`kelas-${schoolData.id}`);
+                    if (kelasInput && kelasInput.value.trim() !== "") {
+                        keteranganKelas = ` ( Kelas ${kelasInput.value.trim()} tidak Hadir )`;
+                    }
+                }
+
+                finalReport.push(`${schoolData.name} Hanya Menerima ${jumlah} Porsi${keteranganKelas}`);
             } else if (status === 'libur') {
                 finalReport.push(`${schoolData.name} LIBUR`);
             } else if (status === 'luar') {
