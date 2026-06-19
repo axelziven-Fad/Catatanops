@@ -63,7 +63,6 @@
             font-weight: 500;
         }
 
-        /* --- STYLING BARU UNTUK FITUR TAMBAH KELOMPOK --- */
         .add-container {
             background-color: var(--bg-card);
             border: 1px dashed var(--accent);
@@ -111,7 +110,6 @@
         .btn-add:hover {
             background-color: var(--success-hover);
         }
-        /* ------------------------------------------------ */
 
         .category-header {
             font-size: 1.1rem;
@@ -163,6 +161,7 @@
             align-items: center;
             flex: 1 1 350px;
             justify-content: flex-end;
+            flex-wrap: wrap;
         }
 
         select, input {
@@ -194,23 +193,18 @@
             padding-right: 2.5rem;
         }
 
-        input[type="number"] {
-            width: 120px;
+        /* --- MANAJEMEN DISPLAY INPUT DINAMIS --- */
+        .dynamic-field {
             display: none;
-            cursor: text;
         }
 
-        input[type="text"].kelas-input {
-            width: 140px;
-            display: none;
-            cursor: text;
-        }
+        /* Jika mode porsi aktif */
+        .mode-porsi .field-porsi { display: block; width: 110px; animation: fadeIn 0.2s ease; }
+        .mode-porsi .field-kelas { display: block; width: 140px; animation: fadeIn 0.2s ease; }
 
-        .show-input input[type="number"],
-        .show-input input[type="text"].kelas-input {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+        /* Jika mode penambahan / pengurangan aktif */
+        .mode-penerima .field-orang { display: block; width: 110px; animation: fadeIn 0.2s ease; }
+        .mode-penerima .field-nama { display: block; width: 160px; cursor: text; animation: fadeIn 0.2s ease; }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-5px); }
@@ -339,11 +333,11 @@
                 font-size: 1rem;
                 padding: 0.9rem 1rem;
             }
-            input[type="number"],
-            input[type="text"].kelas-input {
+            .mode-porsi .field-porsi, 
+            .mode-porsi .field-kelas,
+            .mode-penerima .field-orang,
+            .mode-penerima .field-nama {
                 width: 100%;
-                font-size: 1rem;
-                padding: 0.9rem 1rem;
             }
             .result-container { padding: 1.2rem; }
             .btn-copy {
@@ -393,7 +387,6 @@
 </div>
 
 <script>
-    // Struktur default telah ditambahkan Balita
     const defaultSchoolGroups = [
         {
             category: "Kelompok PAUD, KB & RA",
@@ -428,20 +421,14 @@
 
     const schoolListContainer = document.getElementById('schoolList');
     
-    // Variabel Global untuk Tracking
     let allSchoolsMap = []; 
     let mergedGroups = [];
     let globalIndex = 0;
 
-    // Fungsi Inisialisasi Utama untuk ngatur merge Default + LocalStorage
     function initApp() {
-        // Tarik data dinamis dari memory browser
         let customItems = JSON.parse(localStorage.getItem('customMBGTarget')) || [];
-        
-        // Deep copy default array agar tidak menimpa data asli saat runtime
         mergedGroups = JSON.parse(JSON.stringify(defaultSchoolGroups));
 
-        // Inject data custom ke dalam kategori yang tepat
         customItems.forEach(custom => {
             let targetGroup = mergedGroups.find(g => g.category === custom.category);
             if (targetGroup) {
@@ -453,7 +440,6 @@
         renderList();
     }
 
-    // Mengisi dropdown kategori untuk fitur Tambah
     function populateDropdown() {
         const dropdown = document.getElementById('newCategoryDropdown');
         dropdown.innerHTML = '';
@@ -465,11 +451,10 @@
         });
     }
 
-    // Fungsi untuk merender list UI agar bisa di-refresh otomatis
     function renderList() {
-        schoolListContainer.innerHTML = ''; // Kosongkan div utama
-        allSchoolsMap = []; // Reset map
-        globalIndex = 0; // Reset index
+        schoolListContainer.innerHTML = ''; 
+        allSchoolsMap = []; 
+        globalIndex = 0; 
 
         mergedGroups.forEach(group => {
             const header = document.createElement('h2');
@@ -488,7 +473,7 @@
                 div.id = `item-${globalIndex}`;
                 
                 const kelasInputHTML = isSDCategory 
-                    ? `<input type="text" id="kelas-${globalIndex}" class="kelas-input" placeholder="Kelas libur (Misal: 4)">` 
+                    ? `<input type="text" id="kelas-${globalIndex}" class="dynamic-field field-kelas" placeholder="Kelas libur (Misal: 4)">` 
                     : '';
 
                 div.innerHTML = `
@@ -497,16 +482,22 @@
                         <select id="status-${globalIndex}" onchange="handleStatusChange(${globalIndex})">
                             <option value="aman">Aman / Sesuai (Tidak Masuk Catatan)</option>
                             <option value="porsi">Hanya Menerima ... Porsi</option>
+                            <option value="tambah">Penambahan Penerima Manfaat</option>
+                            <option value="kurang">Pengurangan Penerima Manfaat</option>
                             <option value="libur">LIBUR</option>
                             <option value="luar">Tidak ingin menerima MBG (Kegiatan Luar)</option>
                         </select>
-                        <input type="number" id="porsi-${globalIndex}" placeholder="Jml Porsi" min="0">
+                        
+                        <input type="number" id="porsi-${globalIndex}" class="dynamic-field field-porsi" placeholder="Jml Porsi" min="0">
                         ${kelasInputHTML}
+
+                        <input type="number" id="orang-${globalIndex}" class="dynamic-field field-orang" placeholder="Jml Orang" min="0">
+                        <input type="text" id="nama-penerima-${globalIndex}" class="dynamic-field field-nama" placeholder="Atas Nama">
                     </div>
                 `;
                 listDiv.appendChild(div);
                 
-                allSchoolsMap.push({ id: globalIndex, name: school, isSD: isSDCategory });
+                allSchoolsMap.push({ id: globalIndex, name: school, isSD: isSDCategory, subCategory: group.category });
                 globalIndex++;
             });
 
@@ -514,7 +505,6 @@
         });
     }
 
-    // Fungsi menyimpan target baru
     function addNewItem() {
         const category = document.getElementById('newCategoryDropdown').value;
         const name = document.getElementById('newNameInput').value.trim();
@@ -524,12 +514,10 @@
             return;
         }
 
-        // Simpan ke localStorage
         let customItems = JSON.parse(localStorage.getItem('customMBGTarget')) || [];
         customItems.push({ category: category, name: name });
         localStorage.setItem('customMBGTarget', JSON.stringify(customItems));
 
-        // Bersihkan input dan render ulang aplikasinya
         document.getElementById('newNameInput').value = '';
         initApp(); 
     }
@@ -538,17 +526,22 @@
         const selectBox = document.getElementById(`status-${index}`);
         const controlDiv = document.getElementById(`control-${index}`);
         
+        // Reset class pembungkus input dinamis
+        controlDiv.classList.remove('mode-porsi', 'mode-penerima');
+
         if (selectBox.value === 'porsi') {
-            controlDiv.classList.add('show-input');
+            controlDiv.classList.add('mode-porsi');
             setTimeout(() => { document.getElementById(`porsi-${index}`).focus(); }, 100);
+        } else if (selectBox.value === 'tambah' || selectBox.value === 'kurang') {
+            controlDiv.classList.add('mode-penerima');
+            setTimeout(() => { document.getElementById(`orang-${index}`).focus(); }, 100);
         } else {
-            controlDiv.classList.remove('show-input');
-            document.getElementById(`porsi-${index}`).value = ""; 
-            
+            // Bersihkan value jika kembali ke status normal/libur
+            document.getElementById(`porsi-${index}`).value = "";
+            document.getElementById(`orang-${index}`).value = "";
+            document.getElementById(`nama-penerima-${index}`).value = "";
             const kelasInput = document.getElementById(`kelas-${index}`);
-            if (kelasInput) {
-                kelasInput.value = "";
-            }
+            if (kelasInput) kelasInput.value = "";
         }
     }
 
@@ -569,8 +562,18 @@
                         keteranganKelas = ` ( Kelas ${kelasInput.value.trim()} tidak Hadir )`;
                     }
                 }
-
                 finalReport.push(`${schoolData.name} Hanya Menerima ${jumlah} Porsi${keteranganKelas}`);
+                
+            } else if (status === 'tambah') {
+                const orangValue = document.getElementById(`orang-${schoolData.id}`).value || "0";
+                const namaValue = document.getElementById(`nama-penerima-${schoolData.id}`).value.trim() || "Anonim";
+                finalReport.push(`Penambahan penerima manfaat ${orangValue} orang atas nama ${namaValue} di ${schoolData.name} (${schoolData.subCategory})`);
+                
+            } else if (status === 'kurang') {
+                const orangValue = document.getElementById(`orang-${schoolData.id}`).value || "0";
+                const namaValue = document.getElementById(`nama-penerima-${schoolData.id}`).value.trim() || "Anonim";
+                finalReport.push(`Pengurangan penerima manfaat ${orangValue} orang atas nama ${namaValue} di ${schoolData.name} (${schoolData.subCategory})`);
+                
             } else if (status === 'libur') {
                 finalReport.push(`${schoolData.name} LIBUR`);
             } else if (status === 'luar') {
@@ -616,7 +619,6 @@
         });
     }
 
-    // Jalankan eksekusi awal pas buka browser
     window.onload = initApp;
 </script>
 
