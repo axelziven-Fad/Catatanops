@@ -416,6 +416,13 @@
             items: [
                 "MAN 2 Kulon Progo", "Ibu Hamil (Bumil)", "Ibu Menyusui (Busui)", "Balita"
             ]
+        },
+        {
+            category: "Kelompok Posyandu",
+            items: [
+                "Posyandu Tanjung 1", "Posyandu Tanjung 2", "Posyandu Tanjung 3", "Posyandu Tanjung 4",
+                "Posyandu Tanjung 5", "Posyandu Tanjung 6", "Posyandu Tanjung 7", "Posyandu Tanjung 8"
+            ]
         }
     ];
 
@@ -567,12 +574,12 @@
             } else if (status === 'tambah') {
                 const orangValue = document.getElementById(`orang-${schoolData.id}`).value || "0";
                 const namaValue = document.getElementById(`nama-penerima-${schoolData.id}`).value.trim() || "Anonim";
-                finalReport.push(`Penambahan penerima manfaat ${orangValue} orang atas nama ${namaValue} di ${schoolData.name} (${schoolData.subCategory})`);
+                finalReport.push(`${schoolData.name} Bertambah ${orangValue} atas nama ${namaValue}`);
                 
             } else if (status === 'kurang') {
                 const orangValue = document.getElementById(`orang-${schoolData.id}`).value || "0";
                 const namaValue = document.getElementById(`nama-penerima-${schoolData.id}`).value.trim() || "Anonim";
-                finalReport.push(`Pengurangan penerima manfaat ${orangValue} orang atas nama ${namaValue} di ${schoolData.name} (${schoolData.subCategory})`);
+                finalReport.push(`${schoolData.name} Berkurang ${orangValue} atas nama ${namaValue}`);
                 
             } else if (status === 'libur') {
                 finalReport.push(`${schoolData.name} LIBUR`);
